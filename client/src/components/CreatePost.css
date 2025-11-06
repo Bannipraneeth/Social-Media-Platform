@@ -1,0 +1,61 @@
+.create-post-card {
+  background: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: var(--shadow);
+}
+
+.create-post-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+.create-post-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.visibility-options {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.visibility-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+}
+
+.visibility-option:hover {
+  background: var(--background-secondary);
+}
+
+.visibility-option input[type="radio"] {
+  cursor: pointer;
+}
+
+.visibility-option span {
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .visibility-options {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .visibility-option {
+    width: 100%;
+  }
+}
+
