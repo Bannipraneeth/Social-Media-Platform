@@ -1,14 +1,29 @@
 import express from 'express';
 import Post from '../models/Post.js';
+import User from '../models/User.js';
 import { authenticate } from '../middleware/auth.js';
 import { validatePost, validateComment, sanitizeString, handleValidationErrors } from '../middleware/validation.js';
+import { upload } from '../middleware/upload.js';
 
 const router = express.Router();
 
-// Get all public posts (feed) - reverse chronological
+// Get feed - supports filtering by following users
 router.get('/feed', authenticate, async (req, res) => {
   try {
-    const posts = await Post.find({ visibility: 'Public' })
+    const { filter = 'all' } = req.query; // 'all' or 'following'
+    
+    let query = { visibility: 'Public' };
+
+    // If filtering by following, only show posts from users the current user follows
+    if (filter === 'following') {
+      const currentUser = await User.findById(req.user._id).select('following');
+      if (!currentUser.following || currentUser.following.length === 0) {
+        return res.json({ posts: [] });
+      }
+      query.author = { $in: currentUser.following };
+    }
+
+    const posts = await Post.find(query)
       .populate('author', 'username')
       .populate('likes', 'username')
       .populate('comments.author', 'username')
@@ -38,19 +53,28 @@ router.get('/my-posts', authenticate, async (req, res) => {
   }
 });
 
-// Create a new post
-router.post('/', authenticate, validatePost, async (req, res) => {
+// Create a new post (with optional image upload)
+router.post('/', authenticate, upload.single('image'), validatePost, async (req, res) => {
   try {
     const { content, visibility = 'Public' } = req.body;
+    
+    // Get image URL if file was uploaded
+    let imageUrl = null;
+    if (req.file) {
+      imageUrl = `/uploads/${req.file.filename}`;
+    }
 
     const post = new Post({
       author: req.user._id,
       content: sanitizeString(content),
-      visibility
+      visibility,
+      image: imageUrl
     });
 
     await post.save();
     await post.populate('author', 'username');
+    await post.populate('likes', 'username');
+    await post.populate('comments.author', 'username');
 
     res.status(201).json({ 
       message: 'Post created successfully',
@@ -86,8 +110,8 @@ router.get('/:id', authenticate, async (req, res) => {
   }
 });
 
-// Update a post (only author)
-router.put('/:id', authenticate, validatePost, async (req, res) => {
+// Update a post (only author) - supports image update
+router.put('/:id', authenticate, upload.single('image'), validatePost, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
 
@@ -107,6 +131,28 @@ router.put('/:id', authenticate, validatePost, async (req, res) => {
     }
     if (visibility) {
       post.visibility = visibility;
+    }
+    
+    // Handle image update
+    if (req.file) {
+      // Delete old image if exists
+      if (post.image) {
+        const fs = await import('fs');
+        const path = await import('path');
+        const { fileURLToPath } = await import('url');
+        const { dirname } = await import('path');
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = dirname(__filename);
+        const oldImagePath = path.join(__dirname, '..', post.image);
+        try {
+          if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath);
+          }
+        } catch (err) {
+          console.error('Error deleting old image:', err);
+        }
+      }
+      post.image = `/uploads/${req.file.filename}`;
     }
 
     post.updatedAt = Date.now();

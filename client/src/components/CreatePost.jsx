@@ -6,13 +6,43 @@ import './CreatePost.css';
 const CreatePost = ({ onPostCreated }) => {
   const [content, setContent] = useState('');
   const [visibility, setVisibility] = useState('Public');
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please select an image file');
+        return;
+      }
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB');
+        return;
+      }
+      setImageFile(file);
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (content.trim().length === 0) {
-      toast.error('Post content cannot be empty');
+    if (content.trim().length === 0 && !imageFile) {
+      toast.error('Post content or image is required');
       return;
     }
 
@@ -23,12 +53,17 @@ const CreatePost = ({ onPostCreated }) => {
 
     setIsSubmitting(true);
     try {
-      const response = await createPost(content.trim(), visibility);
+      const response = await createPost(content.trim(), visibility, imageFile);
       if (onPostCreated) {
         onPostCreated(response.post);
       }
       setContent('');
       setVisibility('Public');
+      setImageFile(null);
+      setImagePreview(null);
+      // Reset file input
+      const fileInput = document.getElementById('image-input');
+      if (fileInput) fileInput.value = '';
       toast.success('Post created successfully!');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to create post');
@@ -72,6 +107,33 @@ const CreatePost = ({ onPostCreated }) => {
         </div>
 
         <div className="form-group">
+          <label htmlFor="image-input" className="btn btn-secondary btn-small">
+            📷 Upload Image
+          </label>
+          <input
+            id="image-input"
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            style={{ display: 'none' }}
+            aria-label="Upload image"
+          />
+          {imagePreview && (
+            <div className="image-preview">
+              <img src={imagePreview} alt="Preview" />
+              <button
+                type="button"
+                onClick={removeImage}
+                className="btn-icon btn-danger-icon"
+                aria-label="Remove image"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="form-group">
           <label className="form-label">Visibility</label>
           <div className="visibility-options">
             <label className="visibility-option">
@@ -102,7 +164,7 @@ const CreatePost = ({ onPostCreated }) => {
         <button
           type="submit"
           className="btn btn-primary btn-full"
-          disabled={isSubmitting || content.trim().length === 0}
+          disabled={isSubmitting || (content.trim().length === 0 && !imageFile)}
           aria-label="Submit post"
         >
           {isSubmitting ? 'Posting...' : 'Post'}

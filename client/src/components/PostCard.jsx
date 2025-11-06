@@ -67,8 +67,8 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
   };
 
   const handleSaveEdit = async () => {
-    if (editContent.trim().length === 0) {
-      toast.error('Post content cannot be empty');
+    if (editContent.trim().length === 0 && !post.image) {
+      toast.error('Post content or image is required');
       return;
     }
     if (editContent.length > 280) {
@@ -253,7 +253,18 @@ const PostCard = ({ post, onUpdate, onDelete }) => {
         </div>
       ) : (
         <>
-          <div className="post-content">{post.content}</div>
+          {post.content && <div className="post-content">{post.content}</div>}
+          {post.image && (
+            <div className="post-image">
+              <img
+                src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${post.image}`}
+                alt="Post image"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            </div>
+          )}
 
           <div className="post-actions-bar">
             <button

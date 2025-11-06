@@ -3,6 +3,15 @@
   min-height: calc(100vh - 80px);
 }
 
+.feed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
 .page-title {
   font-size: 36px;
   font-weight: 700;
@@ -13,7 +22,40 @@
 .page-subtitle {
   font-size: 18px;
   color: var(--text-secondary);
-  margin-bottom: 30px;
+}
+
+.feed-filter {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.filter-btn {
+  padding: 10px 20px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--background-color);
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  min-height: 44px;
+}
+
+.filter-btn:hover {
+  background: var(--background-secondary);
+  border-color: var(--primary-color);
+}
+
+.filter-btn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.filter-btn.active:hover {
+  background: var(--primary-hover);
 }
 
 .posts-container {

@@ -99,13 +99,16 @@ router.post('/login', validateLogin, async (req, res) => {
 // Get current user
 router.get('/me', authenticate, async (req, res) => {
   try {
+    const user = await req.user.populate('followers following');
     res.json({
       user: {
-        id: req.user._id.toString(),
-        _id: req.user._id.toString(),
-        username: req.user.username,
-        email: req.user.email,
-        createdAt: req.user.createdAt
+        id: user._id.toString(),
+        _id: user._id.toString(),
+        username: user.username,
+        email: user.email,
+        createdAt: user.createdAt,
+        followersCount: user.followers?.length || 0,
+        followingCount: user.following?.length || 0
       }
     });
   } catch (error) {

@@ -2,8 +2,8 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-export const getFeed = async () => {
-  const response = await axios.get(`${API_URL}/posts/feed`);
+export const getFeed = async (filter = 'all') => {
+  const response = await axios.get(`${API_URL}/posts/feed?filter=${filter}`);
   return response.data;
 };
 
@@ -17,15 +17,34 @@ export const getPost = async (id) => {
   return response.data;
 };
 
-export const createPost = async (content, visibility = 'Public') => {
-  const response = await axios.post(`${API_URL}/posts`, { content, visibility });
+export const createPost = async (content, visibility = 'Public', imageFile = null) => {
+  const formData = new FormData();
+  formData.append('content', content);
+  formData.append('visibility', visibility);
+  if (imageFile) {
+    formData.append('image', imageFile);
+  }
+  
+  const response = await axios.post(`${API_URL}/posts`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
   return response.data;
 };
 
-export const updatePost = async (id, content, visibility) => {
-  const response = await axios.put(`${API_URL}/posts/${id}`, {
-    content,
-    visibility,
+export const updatePost = async (id, content, visibility, imageFile = null) => {
+  const formData = new FormData();
+  formData.append('content', content);
+  formData.append('visibility', visibility);
+  if (imageFile) {
+    formData.append('image', imageFile);
+  }
+  
+  const response = await axios.put(`${API_URL}/posts/${id}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
   });
   return response.data;
 };

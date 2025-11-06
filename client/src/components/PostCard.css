@@ -82,6 +82,22 @@
   word-wrap: break-word;
 }
 
+.post-image {
+  margin-bottom: 15px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  max-width: 100%;
+  background: var(--background-secondary);
+}
+
+.post-image img {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+  display: block;
+}
+
 .post-actions-bar {
   display: flex;
   gap: 20px;

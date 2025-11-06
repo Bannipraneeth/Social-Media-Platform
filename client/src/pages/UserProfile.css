@@ -1,0 +1,22 @@
+.user-profile-page {
+  padding: 20px;
+  min-height: calc(100vh - 80px);
+}
+
+.btn-follow {
+  margin-left: 15px;
+}
+
+@media (max-width: 768px) {
+  .profile-username {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .btn-follow {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+

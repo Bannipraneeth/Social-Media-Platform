@@ -13,6 +13,10 @@ const postSchema = new mongoose.Schema({
     maxlength: [280, 'Post cannot exceed 280 characters'],
     trim: true
   },
+  image: {
+    type: String, // URL to the uploaded image
+    default: null
+  },
   visibility: {
     type: String,
     enum: ['Public', 'Private'],

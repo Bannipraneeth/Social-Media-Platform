@@ -9,15 +9,16 @@ const Feed = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filter, setFilter] = useState('all'); // 'all' or 'following'
 
   useEffect(() => {
     fetchFeed();
-  }, []);
+  }, [filter]);
 
   const fetchFeed = async () => {
     try {
       setLoading(true);
-      const response = await getFeed();
+      const response = await getFeed(filter);
       setPosts(response.posts || []);
       setError(null);
     } catch (error) {
@@ -74,8 +75,28 @@ const Feed = () => {
   return (
     <div className="feed-page">
       <div className="container">
-        <h1 className="page-title">Feed</h1>
-        <p className="page-subtitle">Discover what's happening in your community</p>
+        <div className="feed-header">
+          <div>
+            <h1 className="page-title">Feed</h1>
+            <p className="page-subtitle">Discover what's happening in your community</p>
+          </div>
+          <div className="feed-filter">
+            <button
+              className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+              onClick={() => setFilter('all')}
+              aria-label="Show all posts"
+            >
+              All Posts
+            </button>
+            <button
+              className={`filter-btn ${filter === 'following' ? 'active' : ''}`}
+              onClick={() => setFilter('following')}
+              aria-label="Show following posts"
+            >
+              Following
+            </button>
+          </div>
+        </div>
 
         <CreatePost onPostCreated={handlePostCreated} />
 
